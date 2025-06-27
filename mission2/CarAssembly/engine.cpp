@@ -9,7 +9,7 @@ enum EngineType
     BrokenEngine
 };
 
-class Engine : System {
+class Engine : public System {
 
 public:
     Engine() {};

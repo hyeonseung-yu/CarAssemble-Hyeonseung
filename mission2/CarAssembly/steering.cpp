@@ -7,7 +7,7 @@ enum SteeringType
     MOBIS
 };
 
-class Steering : System {
+class Steering : public System {
 
 public:
     Steering() {};

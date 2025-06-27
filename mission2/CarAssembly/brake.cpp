@@ -9,7 +9,7 @@ enum BrakeType
 };
 
 
-class Brake : System {
+class Brake : public System {
 
 public:
     Brake() {};

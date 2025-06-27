@@ -8,7 +8,7 @@ enum CarType
     TRUCK
 };
 
-class Car : System {
+class Car : public System {
 
 public:
     Car() {};

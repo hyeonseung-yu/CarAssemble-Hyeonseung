@@ -13,6 +13,8 @@ int main()
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <memory>
+#include <vector>
 
 #include "system.h"
 #include "car.cpp"
@@ -23,15 +25,13 @@ int main()
 
 #define CLEAR_SCREEN "\033[H\033[2J"
 
-void runProducedCar(const Assembler& assembler, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering);
+void runAssembledCar(const Assembler& assembler, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering);
 void delay(int ms);
-bool parseInt(const std::string& input, int& answer);
-void showCarTypeQuestion(const Car& car);
-void showEngineTypeQuestion(const Engine& engine);
-void showBrakeTypeQuestion(const Brake& brake);
-void showSteeringTypeQuestion(const Steering& steering);
-void showRunTestQuestion();
-bool isSystemTypeInvalid(int step, int answer, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering);
+bool parseInt(const std::string& input, int& answer);\
+void printTypeQuestion(int step, const std::vector<std::shared_ptr<System>>& systems);
+void printRunTestQuestion();
+void printSelectionMsg(int step, int answer, const std::vector<std::shared_ptr<System>>& systems);
+bool isSystemTypeInvalid(int step, int answer, const std::vector<std::shared_ptr<System>>& systems);
 
 enum QuestionType
 {
@@ -46,20 +46,24 @@ int main()
 {
     std::string input;
     int step = CarType_Q;
-    Car car;
-    Engine engine;
-    Brake brake;
-    Steering steering;
+    std::shared_ptr<Car> car(new Car());
+    std::shared_ptr<Engine> engine(new Engine());
+    std::shared_ptr<Brake> brake(new Brake());
+    std::shared_ptr<Steering> steering(new Steering());
+
     Assembler& assembler = Assembler::getInstance();
+
+    std::vector<std::shared_ptr<System>> systems;
+    systems.push_back(car);
+    systems.push_back(engine);
+    systems.push_back(brake);
+    systems.push_back(steering);
 
     while (1)
     {
         printf(CLEAR_SCREEN);
-        if (step == CarType_Q) showCarTypeQuestion(car);
-        else if (step == Engine_Q) showEngineTypeQuestion(engine);
-        else if (step == BrakeSystem_Q) showBrakeTypeQuestion(brake);
-        else if (step == SteeringSystem_Q) showSteeringTypeQuestion(steering);
-        else if (step == Run_Test) showRunTestQuestion();
+        if (step <= SteeringSystem_Q) printTypeQuestion(step, systems);
+        else if (step == Run_Test) printRunTestQuestion();
         std::cout << "===============================\n";
 
         std::cout << "INPUT > ";
@@ -77,7 +81,7 @@ int main()
             continue;
         }
 
-        if (step <= SteeringSystem_Q && isSystemTypeInvalid( step, answer, car, engine, brake, steering ) ) {
+        if (step <= SteeringSystem_Q && isSystemTypeInvalid( step, answer, systems ) ) {
             delay(800);
             continue;
         }
@@ -104,41 +108,27 @@ int main()
         }
 
         if (step <= SteeringSystem_Q) {
-            if (step == CarType_Q) {
-                car.setType(answer);
-                std::cout << "차량 타입으로 " << car.getTypeName(answer) << "을 선택하셨습니다.\n";
-            }
-            else if (step == Engine_Q) {
-                engine.setType(answer);
-                std::cout << engine.getTypeName(answer) << " 엔진을 선택하셨습니다.\n";
-            }
-            else if (step == BrakeSystem_Q) {
-                brake.setType(answer);
-                std::cout << brake.getTypeName(answer) << " 제동장치를 선택하셨습니다.\n";
-            }
-            else if (step == SteeringSystem_Q) {
-                steering.setType(answer);
-                std::cout << steering.getTypeName(answer) << " 조향장치를 선택하셨습니다.\n";
-            }
+            systems[step]->setType(answer);
+            printSelectionMsg(step, answer, systems);
             delay(1500);
             step += 1;
         }
         else if (step == Run_Test && answer == 1)
         {
-            runProducedCar(assembler, car, engine, brake, steering);
+            runAssembledCar(assembler, *car, *engine, *brake, *steering);
             delay(2000);
         }
         else if (step == Run_Test && answer == 2)
         {
             std::cout << "Test..." << std::endl;
             delay(1500);
-            std::cout << "자동차 부품 조합 테스트 결과 : " << assembler.generateTestResultString(car, engine, brake, steering) << std::endl;
+            std::cout << "자동차 부품 조합 테스트 결과 : " << assembler.generateTestResultString(*car, *engine, *brake, *steering) << std::endl;
             delay(2000);
         }
     }
 }
 
-void runProducedCar(const Assembler& assembler, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering)
+void runAssembledCar(const Assembler& assembler, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering)
 {
     if (!assembler.isValidAssembly(car, engine, brake, steering))
     {
@@ -182,45 +172,42 @@ bool parseInt(const std::string& input, int& answer) {
     return !ss.fail() && ss.eof();
 }
 
+void printTypeQuestion(int step, const std::vector<std::shared_ptr<System>>& systems) {
+    if (step == CarType_Q)
+    {
+        printf("        ______________\n");
+        printf("       /|            | \n");
+        printf("  ____/_|_____________|____\n");
+        printf(" |                      O  |\n");
+        printf(" '-(@)----------------(@)--'\n");
+        printf("===============================\n");
+        printf("어떤 차량 타입을 선택할까요?\n");
+    }
+    else if (step == Engine_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("어떤 엔진을 탑재할까요?\n");
+        printf("0. 뒤로가기\n");
+    }
+    else if (step == BrakeSystem_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("어떤 제동장치를 선택할까요?\n");
+        printf("0. 뒤로가기\n");
+    }
+    else if (step == SteeringSystem_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("어떤 조향장치를 선택할까요?\n");
+        printf("0. 뒤로가기\n");
+    }
 
-void showCarTypeQuestion(const Car& car) {
-    std::cout << "        ______________\n";
-    std::cout << "       /|            | \n";
-    std::cout << "  ____/_|_____________|____\n";
-    std::cout << " |                      O  |\n";
-    std::cout << " '-(@)----------------(@)--'\n";
-    std::cout << "===============================\n";
-    std::cout << "어떤 차량 타입을 선택할까요?\n";
-    for (int type = 1; type <= car.numberOfAvailableTypes(); type++) {
-        std::cout << type << ". " << car.getTypeName(type) << std::endl;
+    for (int type = 1; type <= systems[step]->numberOfAvailableTypes(); type++) {
+        std::cout << type << ". " << systems[step]->getTypeName(type) << std::endl;
     }
 }
 
-void showEngineTypeQuestion(const Engine& engine) {
-
-    std::cout << "어떤 엔진을 탑재할까요?\n";
-    std::cout << "0. 뒤로가기\n";
-    for (int type = 1; type <= engine.numberOfAvailableTypes(); type++) {
-        std::cout << type << ". " << engine.getTypeName(type) << std::endl;
-    }
-}
-
-void showBrakeTypeQuestion(const Brake& brake) {
-    std::cout << "어떤 제동장치를 선택할까요?\n";
-    std::cout << "0. 뒤로가기\n";
-    for (int type = 1; type <= brake.numberOfAvailableTypes(); type++) {
-        std::cout << type << ". " << brake.getTypeName(type) << std::endl;
-    }
-}
-void showSteeringTypeQuestion(const Steering& steering) {
-    std::cout << "어떤 조향장치를 선택할까요?\n";
-    std::cout << "0. 뒤로가기\n";
-    for (int type = 1; type <= steering.numberOfAvailableTypes(); type++) {
-        std::cout << type << ". " << steering.getTypeName(type) << std::endl;
-    }
-}
-
-void showRunTestQuestion() {
+void printRunTestQuestion() {
     std::cout << "멋진 차량이 완성되었습니다.\n";
     std::cout << "어떤 동작을 할까요?\n";
     std::cout << "0. 처음 화면으로 돌아가기\n";
@@ -229,29 +216,44 @@ void showRunTestQuestion() {
 }
 
 
-bool isSystemTypeInvalid(int step, int answer, const Car& car, const Engine& engine, const Brake& brake, const Steering& steering) {
+void printSelectionMsg(int step, int answer, const std::vector<std::shared_ptr<System>>& systems) {
+    if (step == CarType_Q) {
+        std::cout << "차량 타입으로 " << systems[step]->getTypeName(answer) << "을 선택하셨습니다.\n";
+    }
+    else if (step == Engine_Q) {
+        std::cout << systems[step]->getTypeName(answer) << " 엔진을 선택하셨습니다.\n";
+    }
+    else if (step == BrakeSystem_Q) {
+        std::cout << systems[step]->getTypeName(answer) << " 제동장치를 선택하셨습니다.\n";
+    }
+    else if (step == SteeringSystem_Q) {
+        std::cout << systems[step]->getTypeName(answer) << " 조향장치를 선택하셨습니다.\n";
+    }
+}
 
-    if (step == CarType_Q && !car.isValidTypeRange(answer))
+bool isSystemTypeInvalid(int step, int answer, const std::vector<std::shared_ptr<System>>& systems) {
+
+    if (step == CarType_Q && !systems[CarType_Q]->isValidTypeRange(answer))
     {
-        std::cout << "ERROR :: 차량 타입은 1 ~ " << car.numberOfAvailableTypes() << " 범위만 선택 가능\n";
+        std::cout << "ERROR :: 차량 타입은 1 ~ " << systems[CarType_Q]->numberOfAvailableTypes() << " 범위만 선택 가능\n";
         return true;
     }
 
-    if (step == Engine_Q && !(answer == 0 || engine.isValidTypeRange(answer)))
+    if (step == Engine_Q && !(answer == 0 || systems[Engine_Q]->isValidTypeRange(answer)))
     {
-        std::cout << "ERROR :: 엔진은 1 ~ " << engine.numberOfAvailableTypes() << " 범위만 선택 가능\n";
+        std::cout << "ERROR :: 엔진은 1 ~ " << systems[Engine_Q]->numberOfAvailableTypes() << " 범위만 선택 가능\n";
         return true;
     }
 
-    if (step == BrakeSystem_Q && !(answer == 0 || brake.isValidTypeRange(answer)))
+    if (step == BrakeSystem_Q && !(answer == 0 || systems[BrakeSystem_Q]->isValidTypeRange(answer)))
     {
-        std::cout << "ERROR :: 제동장치는 1 ~ " << brake.numberOfAvailableTypes() << " 범위만 선택 가능\n";
+        std::cout << "ERROR :: 제동장치는 1 ~ " << systems[BrakeSystem_Q]->numberOfAvailableTypes() << " 범위만 선택 가능\n";
         return true;
     }
 
-    if (step == SteeringSystem_Q && !(answer == 0 || steering.isValidTypeRange(answer)))
+    if (step == SteeringSystem_Q && !(answer == 0 || systems[SteeringSystem_Q]->isValidTypeRange(answer)))
     {
-        std::cout << "ERROR :: 조향장치는 1 ~ " << steering.numberOfAvailableTypes() << " 범위만 선택 가능\n";
+        std::cout << "ERROR :: 조향장치는 1 ~ " << systems[SteeringSystem_Q]->numberOfAvailableTypes() << " 범위만 선택 가능\n";
         return true;
     }
 

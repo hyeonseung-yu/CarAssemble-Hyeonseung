@@ -30,7 +30,8 @@ public:
 
     std::string generateTestResultString(const Car& car, const Engine& engine, const Brake& brake, const Steering& steering) const
     {
-        std::string result;
+        std::string result = "PASS";
+
         if (car.getType() == SEDAN && brake.getType() == CONTINENTAL)
         {
             result = "FAIL\nSedan에는 Continental제동장치 사용 불가";
@@ -50,10 +51,6 @@ public:
         else if (brake.getType() == BOSCH_B && steering.getType() != BOSCH_S)
         {
             result = "FAIL\nBosch제동장치에는 Bosch조향장치 이외 사용 불가";
-        }
-        else
-        {
-            result = "PASS";
         }
 
         return result;

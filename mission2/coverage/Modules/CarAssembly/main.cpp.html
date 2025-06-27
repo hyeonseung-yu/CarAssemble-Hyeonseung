@@ -24,6 +24,8 @@ int main()
 #include &lt;iostream&gt;
 #include &lt;string&gt;
 #include &lt;sstream&gt;
+#include &lt;memory&gt;
+#include &lt;vector&gt;
 
 #include "system.h"
 #include "car.cpp"
@@ -34,15 +36,13 @@ int main()
 
 #define CLEAR_SCREEN "\033[H\033[2J"
 
-void runProducedCar(const Assembler&amp; assembler, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering);
+void runAssembledCar(const Assembler&amp; assembler, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering);
 void delay(int ms);
-bool parseInt(const std::string&amp; input, int&amp; answer);
-void showCarTypeQuestion(const Car&amp; car);
-void showEngineTypeQuestion(const Engine&amp; engine);
-void showBrakeTypeQuestion(const Brake&amp; brake);
-void showSteeringTypeQuestion(const Steering&amp; steering);
-void showRunTestQuestion();
-bool isSystemTypeInvalid(int step, int answer, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering);
+bool parseInt(const std::string&amp; input, int&amp; answer);\
+void printTypeQuestion(int step, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems);
+void printRunTestQuestion();
+void printSelectionMsg(int step, int answer, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems);
+bool isSystemTypeInvalid(int step, int answer, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems);
 
 enum QuestionType
 {
@@ -57,20 +57,24 @@ int main()
 {
     std::string input;
     int step = CarType_Q;
-    Car car;
-    Engine engine;
-    Brake brake;
-    Steering steering;
+    std::shared_ptr&lt;Car&gt; car(new Car());
+    std::shared_ptr&lt;Engine&gt; engine(new Engine());
+    std::shared_ptr&lt;Brake&gt; brake(new Brake());
+    std::shared_ptr&lt;Steering&gt; steering(new Steering());
+
     Assembler&amp; assembler = Assembler::getInstance();
+
+    std::vector&lt;std::shared_ptr&lt;System&gt;&gt; systems;
+    systems.push_back(car);
+    systems.push_back(engine);
+    systems.push_back(brake);
+    systems.push_back(steering);
 
     while (1)
     {
         printf(CLEAR_SCREEN);
-        if (step == CarType_Q) showCarTypeQuestion(car);
-        else if (step == Engine_Q) showEngineTypeQuestion(engine);
-        else if (step == BrakeSystem_Q) showBrakeTypeQuestion(brake);
-        else if (step == SteeringSystem_Q) showSteeringTypeQuestion(steering);
-        else if (step == Run_Test) showRunTestQuestion();
+        if (step &lt;= SteeringSystem_Q) printTypeQuestion(step, systems);
+        else if (step == Run_Test) printRunTestQuestion();
         std::cout &lt;&lt; "===============================\n";
 
         std::cout &lt;&lt; "INPUT &gt; ";
@@ -88,7 +92,7 @@ int main()
             continue;
         }
 
-        if (step &lt;= SteeringSystem_Q &amp;&amp; isSystemTypeInvalid( step, answer, car, engine, brake, steering ) ) {
+        if (step &lt;= SteeringSystem_Q &amp;&amp; isSystemTypeInvalid( step, answer, systems ) ) {
             delay(800);
             continue;
         }
@@ -115,41 +119,27 @@ int main()
         }
 
         if (step &lt;= SteeringSystem_Q) {
-            if (step == CarType_Q) {
-                car.setType(answer);
-                std::cout &lt;&lt; "Â÷·® Å¸ÀÔÀ¸·Î " &lt;&lt; car.getTypeName(answer) &lt;&lt; "À» ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
-            }
-            else if (step == Engine_Q) {
-                engine.setType(answer);
-                std::cout &lt;&lt; engine.getTypeName(answer) &lt;&lt; " ¿£ÁøÀ» ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
-            }
-            else if (step == BrakeSystem_Q) {
-                brake.setType(answer);
-                std::cout &lt;&lt; brake.getTypeName(answer) &lt;&lt; " Á¦µ¿ÀåÄ¡¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
-            }
-            else if (step == SteeringSystem_Q) {
-                steering.setType(answer);
-                std::cout &lt;&lt; steering.getTypeName(answer) &lt;&lt; " Á¶ÇâÀåÄ¡¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
-            }
+            systems[step]-&gt;setType(answer);
+            printSelectionMsg(step, answer, systems);
             delay(1500);
             step += 1;
         }
         else if (step == Run_Test &amp;&amp; answer == 1)
         {
-            runProducedCar(assembler, car, engine, brake, steering);
+            runAssembledCar(assembler, *car, *engine, *brake, *steering);
             delay(2000);
         }
         else if (step == Run_Test &amp;&amp; answer == 2)
         {
             std::cout &lt;&lt; "Test..." &lt;&lt; std::endl;
             delay(1500);
-            std::cout &lt;&lt; "ÀÚµ¿Â÷ ºÎÇ° Á¶ÇÕ Å×½ºÆ® °á°ú : " &lt;&lt; assembler.generateTestResultString(car, engine, brake, steering) &lt;&lt; std::endl;
+            std::cout &lt;&lt; "ÀÚµ¿Â÷ ºÎÇ° Á¶ÇÕ Å×½ºÆ® °á°ú : " &lt;&lt; assembler.generateTestResultString(*car, *engine, *brake, *steering) &lt;&lt; std::endl;
             delay(2000);
         }
     }
 }
 
-void runProducedCar(const Assembler&amp; assembler, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering)
+void runAssembledCar(const Assembler&amp; assembler, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering)
 {
     if (!assembler.isValidAssembly(car, engine, brake, steering))
     {
@@ -193,45 +183,42 @@ bool parseInt(const std::string&amp; input, int&amp; answer) {
     return !ss.fail() &amp;&amp; ss.eof();
 }
 
+void printTypeQuestion(int step, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems) {
+    if (step == CarType_Q)
+    {
+        printf("        ______________\n");
+        printf("       /|            | \n");
+        printf("  ____/_|_____________|____\n");
+        printf(" |                      O  |\n");
+        printf(" '-(@)----------------(@)--'\n");
+        printf("===============================\n");
+        printf("¾î¶² Â÷·® Å¸ÀÔÀ» ¼±ÅÃÇÒ±î¿ä?\n");
+    }
+    else if (step == Engine_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("¾î¶² ¿£ÁøÀ» Å¾ÀçÇÒ±î¿ä?\n");
+        printf("0. µÚ·Î°¡±â\n");
+    }
+    else if (step == BrakeSystem_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("¾î¶² Á¦µ¿ÀåÄ¡¸¦ ¼±ÅÃÇÒ±î¿ä?\n");
+        printf("0. µÚ·Î°¡±â\n");
+    }
+    else if (step == SteeringSystem_Q)
+    {
+        printf(CLEAR_SCREEN);
+        printf("¾î¶² Á¶ÇâÀåÄ¡¸¦ ¼±ÅÃÇÒ±î¿ä?\n");
+        printf("0. µÚ·Î°¡±â\n");
+    }
 
-void showCarTypeQuestion(const Car&amp; car) {
-    std::cout &lt;&lt; "        ______________\n";
-    std::cout &lt;&lt; "       /|            | \n";
-    std::cout &lt;&lt; "  ____/_|_____________|____\n";
-    std::cout &lt;&lt; " |                      O  |\n";
-    std::cout &lt;&lt; " '-(@)----------------(@)--'\n";
-    std::cout &lt;&lt; "===============================\n";
-    std::cout &lt;&lt; "¾î¶² Â÷·® Å¸ÀÔÀ» ¼±ÅÃÇÒ±î¿ä?\n";
-    for (int type = 1; type &lt;= car.numberOfAvailableTypes(); type++) {
-        std::cout &lt;&lt; type &lt;&lt; ". " &lt;&lt; car.getTypeName(type) &lt;&lt; std::endl;
+    for (int type = 1; type &lt;= systems[step]-&gt;numberOfAvailableTypes(); type++) {
+        std::cout &lt;&lt; type &lt;&lt; ". " &lt;&lt; systems[step]-&gt;getTypeName(type) &lt;&lt; std::endl;
     }
 }
 
-void showEngineTypeQuestion(const Engine&amp; engine) {
-
-    std::cout &lt;&lt; "¾î¶² ¿£ÁøÀ» Å¾ÀçÇÒ±î¿ä?\n";
-    std::cout &lt;&lt; "0. µÚ·Î°¡±â\n";
-    for (int type = 1; type &lt;= engine.numberOfAvailableTypes(); type++) {
-        std::cout &lt;&lt; type &lt;&lt; ". " &lt;&lt; engine.getTypeName(type) &lt;&lt; std::endl;
-    }
-}
-
-void showBrakeTypeQuestion(const Brake&amp; brake) {
-    std::cout &lt;&lt; "¾î¶² Á¦µ¿ÀåÄ¡¸¦ ¼±ÅÃÇÒ±î¿ä?\n";
-    std::cout &lt;&lt; "0. µÚ·Î°¡±â\n";
-    for (int type = 1; type &lt;= brake.numberOfAvailableTypes(); type++) {
-        std::cout &lt;&lt; type &lt;&lt; ". " &lt;&lt; brake.getTypeName(type) &lt;&lt; std::endl;
-    }
-}
-void showSteeringTypeQuestion(const Steering&amp; steering) {
-    std::cout &lt;&lt; "¾î¶² Á¶ÇâÀåÄ¡¸¦ ¼±ÅÃÇÒ±î¿ä?\n";
-    std::cout &lt;&lt; "0. µÚ·Î°¡±â\n";
-    for (int type = 1; type &lt;= steering.numberOfAvailableTypes(); type++) {
-        std::cout &lt;&lt; type &lt;&lt; ". " &lt;&lt; steering.getTypeName(type) &lt;&lt; std::endl;
-    }
-}
-
-void showRunTestQuestion() {
+void printRunTestQuestion() {
     std::cout &lt;&lt; "¸ÚÁø Â÷·®ÀÌ ¿Ï¼ºµÇ¾ú½À´Ï´Ù.\n";
     std::cout &lt;&lt; "¾î¶² µ¿ÀÛÀ» ÇÒ±î¿ä?\n";
     std::cout &lt;&lt; "0. Ã³À½ È­¸éÀ¸·Î µ¹¾Æ°¡±â\n";
@@ -240,29 +227,44 @@ void showRunTestQuestion() {
 }
 
 
-bool isSystemTypeInvalid(int step, int answer, const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering) {
+void printSelectionMsg(int step, int answer, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems) {
+    if (step == CarType_Q) {
+        std::cout &lt;&lt; "Â÷·® Å¸ÀÔÀ¸·Î " &lt;&lt; systems[step]-&gt;getTypeName(answer) &lt;&lt; "À» ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
+    }
+    else if (step == Engine_Q) {
+        std::cout &lt;&lt; systems[step]-&gt;getTypeName(answer) &lt;&lt; " ¿£ÁøÀ» ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
+    }
+    else if (step == BrakeSystem_Q) {
+        std::cout &lt;&lt; systems[step]-&gt;getTypeName(answer) &lt;&lt; " Á¦µ¿ÀåÄ¡¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
+    }
+    else if (step == SteeringSystem_Q) {
+        std::cout &lt;&lt; systems[step]-&gt;getTypeName(answer) &lt;&lt; " Á¶ÇâÀåÄ¡¸¦ ¼±ÅÃÇÏ¼Ì½À´Ï´Ù.\n";
+    }
+}
 
-    if (step == CarType_Q &amp;&amp; !car.isValidTypeRange(answer))
+bool isSystemTypeInvalid(int step, int answer, const std::vector&lt;std::shared_ptr&lt;System&gt;&gt;&amp; systems) {
+
+    if (step == CarType_Q &amp;&amp; !systems[CarType_Q]-&gt;isValidTypeRange(answer))
     {
-        std::cout &lt;&lt; "ERROR :: Â÷·® Å¸ÀÔÀº 1 ~ " &lt;&lt; car.numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
+        std::cout &lt;&lt; "ERROR :: Â÷·® Å¸ÀÔÀº 1 ~ " &lt;&lt; systems[CarType_Q]-&gt;numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
         return true;
     }
 
-    if (step == Engine_Q &amp;&amp; !(answer == 0 || engine.isValidTypeRange(answer)))
+    if (step == Engine_Q &amp;&amp; !(answer == 0 || systems[Engine_Q]-&gt;isValidTypeRange(answer)))
     {
-        std::cout &lt;&lt; "ERROR :: ¿£ÁøÀº 1 ~ " &lt;&lt; engine.numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
+        std::cout &lt;&lt; "ERROR :: ¿£ÁøÀº 1 ~ " &lt;&lt; systems[Engine_Q]-&gt;numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
         return true;
     }
 
-    if (step == BrakeSystem_Q &amp;&amp; !(answer == 0 || brake.isValidTypeRange(answer)))
+    if (step == BrakeSystem_Q &amp;&amp; !(answer == 0 || systems[BrakeSystem_Q]-&gt;isValidTypeRange(answer)))
     {
-        std::cout &lt;&lt; "ERROR :: Á¦µ¿ÀåÄ¡´Â 1 ~ " &lt;&lt; brake.numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
+        std::cout &lt;&lt; "ERROR :: Á¦µ¿ÀåÄ¡´Â 1 ~ " &lt;&lt; systems[BrakeSystem_Q]-&gt;numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
         return true;
     }
 
-    if (step == SteeringSystem_Q &amp;&amp; !(answer == 0 || steering.isValidTypeRange(answer)))
+    if (step == SteeringSystem_Q &amp;&amp; !(answer == 0 || systems[SteeringSystem_Q]-&gt;isValidTypeRange(answer)))
     {
-        std::cout &lt;&lt; "ERROR :: Á¶ÇâÀåÄ¡´Â 1 ~ " &lt;&lt; steering.numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
+        std::cout &lt;&lt; "ERROR :: Á¶ÇâÀåÄ¡´Â 1 ~ " &lt;&lt; systems[SteeringSystem_Q]-&gt;numberOfAvailableTypes() &lt;&lt; " ¹üÀ§¸¸ ¼±ÅÃ °¡´É\n";
         return true;
     }
 

@@ -41,8 +41,9 @@ public:
 
     std::string generateTestResultString(const Car&amp; car, const Engine&amp; engine, const Brake&amp; brake, const Steering&amp; steering) const
 <span style = "background-color:#dfd">    {
-        std::string result;
-        if (car.getType() == SEDAN &amp;&amp; brake.getType() == CONTINENTAL)</span>
+        std::string result = "PASS";</span>
+
+<span style = "background-color:#dfd">        if (car.getType() == SEDAN &amp;&amp; brake.getType() == CONTINENTAL)</span>
         {
 <span style = "background-color:#dfd">            result = "FAIL\nSedan¿¡´Â ContinentalÁ¦µ¿ÀåÄ¡ »ç¿ë ºÒ°¡";
         }
@@ -60,11 +61,7 @@ public:
         }
         else if (brake.getType() == BOSCH_B &amp;&amp; steering.getType() != BOSCH_S)</span>
         {
-<span style = "background-color:#dfd">            result = "FAIL\nBoschÁ¦µ¿ÀåÄ¡¿¡´Â BoschÁ¶ÇâÀåÄ¡ ÀÌ¿Ü »ç¿ë ºÒ°¡";
-        }</span>
-        else
-        {
-<span style = "background-color:#dfd">            result = "PASS";</span>
+<span style = "background-color:#dfd">            result = "FAIL\nBoschÁ¦µ¿ÀåÄ¡¿¡´Â BoschÁ¶ÇâÀåÄ¡ ÀÌ¿Ü »ç¿ë ºÒ°¡";</span>
         }
 
 <span style = "background-color:#dfd">        return result;
