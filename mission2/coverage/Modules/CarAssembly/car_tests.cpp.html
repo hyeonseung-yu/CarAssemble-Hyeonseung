@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+        <meta charset="utf-8"/>
+	    <title>car_tests.cpp</title>
+	    <link href="../../third-party/google-code-prettify/prettify-CppCoverage.css" type="text/css" rel="stylesheet" />
+	    <script type="text/javascript" src="../../third-party/google-code-prettify/prettify.js"></script>
+	</head>
+    <body onload="prettyPrint()">
+        <h4></h4>
+        <pre class="prettyprint lang-cpp linenums">
+#include "gmock/gmock.h"
+#include "car.cpp"
+#include "engine.cpp"
+#include "brake.cpp"
+#include "steering.cpp"
+#include "assembler.cpp"
+
+<span style = "background-color:#dfd">TEST(CAR_TEST, ValidCarRange) {
+	Car car;
+	bool ret = car.isValidTypeRange(2);
+	EXPECT_TRUE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(CAR_TEST, InvalidCarRange) {
+	Car car;
+	bool ret = car.isValidTypeRange(4);
+	EXPECT_FALSE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(CAR_TEST, NumberOfCars) {
+	Car car;
+	int ret = car.numberOfAvailableTypes();
+	EXPECT_EQ(ret, 3);
+}</span>
+
+<span style = "background-color:#dfd">TEST(CAR_TEST, CarTypeName) {
+	Car car;
+	std::string ret = car.getTypeName(1);
+	EXPECT_EQ(ret, "Sedan");
+	ret = car.getTypeName(2);
+	EXPECT_EQ(ret, "SUV");
+	ret = car.getTypeName(3);
+	EXPECT_EQ(ret, "Truck");
+	ret = car.getTypeName(4);
+	EXPECT_EQ(ret, "INVALID TYPE");
+}</span>
+
+<span style = "background-color:#dfd">TEST(CAR_TEST, CarTypeSetGet) {
+	Car car;
+	car.setType(2);
+	int ret = car.getType();
+	EXPECT_EQ(ret, 2);
+}</span>
+
+
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, ValidEngineRange) {
+	Engine engine;
+	bool ret = engine.isValidTypeRange(3);
+	EXPECT_TRUE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, InvalidEngineRange) {
+	Engine engine;
+	bool ret = engine.isValidTypeRange(5);
+	EXPECT_FALSE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, NumberOfEngines) {
+	Engine engine;
+	int ret = engine.numberOfAvailableTypes();
+	EXPECT_EQ(ret, 4);
+}</span>
+
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, EngineTypeName) {
+	Engine engine;
+	std::string ret = engine.getTypeName(1);
+	EXPECT_EQ(ret, "GM");
+	ret = engine.getTypeName(2);
+	EXPECT_EQ(ret, "TOYOTA");
+	ret = engine.getTypeName(3);
+	EXPECT_EQ(ret, "WIA");
+	ret = engine.getTypeName(4);
+	EXPECT_EQ(ret, "°íÀå³­ ¿£Áø");
+	ret = engine.getTypeName(5);
+	EXPECT_EQ(ret, "INVALID TYPE");
+}</span>
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, EngineTypeSetGet) {
+	Engine engine;
+	engine.setType(2);
+	int ret = engine.getType();
+	EXPECT_EQ(ret, 2);
+}</span>
+
+<span style = "background-color:#dfd">TEST(ENGINE_TEST, EngineBroken) {
+	Engine engine;
+	engine.setType(4);
+	bool ret = engine.isEngineBroken();
+	EXPECT_TRUE(ret);
+}</span>
+
+
+<span style = "background-color:#dfd">TEST(BRAKE_TEST, ValidBrakeRange) {
+	Brake brake;
+	bool ret = brake.isValidTypeRange(3);
+	EXPECT_TRUE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(BRAKE_TEST, InvalidBrakeRange) {
+	Brake brake;
+	bool ret = brake.isValidTypeRange(4);
+	EXPECT_FALSE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(BRAKE_TEST, NumberOfBrakes) {
+	Brake brake;
+	int ret = brake.numberOfAvailableTypes();
+	EXPECT_EQ(ret, 3);
+}</span>
+
+<span style = "background-color:#dfd">TEST(BRAKE_TEST, BrakeTypeName) {
+	Brake brake;
+	std::string ret = brake.getTypeName(1);
+	EXPECT_EQ(ret, "MANDO");
+	ret = brake.getTypeName(2);
+	EXPECT_EQ(ret, "CONTINENTAL");
+	ret = brake.getTypeName(3);
+	EXPECT_EQ(ret, "BOSCH");
+	ret = brake.getTypeName(4);
+	EXPECT_EQ(ret, "INVALID TYPE");
+}</span>
+
+<span style = "background-color:#dfd">TEST(BRAKE_TEST, BrakeTypeSetGet) {
+	Brake brake;
+	brake.setType(2);
+	int ret = brake.getType();
+	EXPECT_EQ(ret, 2);
+}</span>
+
+
+
+
+<span style = "background-color:#dfd">TEST(STEERING_TEST, ValidSteeringRange) {
+	Steering steering;
+	bool ret = steering.isValidTypeRange(2);
+	EXPECT_TRUE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(STEERING_TEST, InvalidSteeringRange) {
+	Steering steering;
+	bool ret = steering.isValidTypeRange(3);
+	EXPECT_FALSE(ret);
+}</span>
+
+<span style = "background-color:#dfd">TEST(STEERING_TEST, NumberOfSteerings) {
+	Steering steering;
+	int ret = steering.numberOfAvailableTypes();
+	EXPECT_EQ(ret, 2);
+}</span>
+
+<span style = "background-color:#dfd">TEST(STEERING_TEST, SteeringTypeName) {
+	Steering steering;
+	std::string ret = steering.getTypeName(1);
+	EXPECT_EQ(ret, "BOSCH");
+	ret = steering.getTypeName(2);
+	EXPECT_EQ(ret, "MOBIS");
+	ret = steering.getTypeName(3);
+	EXPECT_EQ(ret, "INVALID TYPE");
+}</span>
+
+<span style = "background-color:#dfd">TEST(STEERING_TEST, SteeringTypeSetGet) {
+	Steering steering;
+	steering.setType(2);
+	int ret = steering.getType();
+	EXPECT_EQ(ret, 2);
+}</span>
+
+
+<span style = "background-color:#dfd">TEST(Assembler_TEST, ValidAssemblyTest) {
+	Car car;
+	Engine engine;
+	Brake brake;
+	Steering steering;
+	Assembler&amp; assembler = Assembler::getInstance();</span>
+	
+<span style = "background-color:#dfd">	car.setType(SEDAN);
+	brake.setType(CONTINENTAL);
+	bool ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_FALSE(ret);</span>
+
+<span style = "background-color:#dfd">	car.setType(SUV);
+	engine.setType(TOYOTA);
+	ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_FALSE(ret);</span>
+
+<span style = "background-color:#dfd">	car.setType(TRUCK);
+	engine.setType(WIA);
+	ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_FALSE(ret);</span>
+
+<span style = "background-color:#dfd">	car.setType(TRUCK);
+	engine.setType(TOYOTA);
+	brake.setType(MANDO);
+	ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_FALSE(ret);</span>
+
+<span style = "background-color:#dfd">	car.setType(SUV);
+	engine.setType(GM);
+	brake.setType(BOSCH_B);
+	steering.setType(MOBIS);
+	ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_FALSE(ret);</span>
+
+<span style = "background-color:#dfd">	car.setType(SUV);
+	engine.setType(GM);
+	brake.setType(MANDO);
+	steering.setType(BOSCH_S);
+	ret = assembler.isValidAssembly(car, engine, brake, steering);
+	EXPECT_TRUE(ret);
+}</span>
+
+
+
+<span style = "background-color:#dfd">TEST(Assembler_TEST, AssemblyResultStrTest) {
+	Car car;
+	Engine engine;
+	Brake brake;
+	Steering steering;
+	Assembler&amp; assembler = Assembler::getInstance();</span>
+
+<span style = "background-color:#dfd">	car.setType(SEDAN);
+	brake.setType(CONTINENTAL);
+	std::string ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "FAIL\nSedan¿¡´Â ContinentalÁ¦µ¿ÀåÄ¡ »ç¿ë ºÒ°¡");</span>
+
+<span style = "background-color:#dfd">	car.setType(SUV);
+	engine.setType(TOYOTA);
+	ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "FAIL\nSUV¿¡´Â TOYOTA¿£Áø »ç¿ë ºÒ°¡");</span>
+
+<span style = "background-color:#dfd">	car.setType(TRUCK);
+	engine.setType(WIA);
+	ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "FAIL\nTruck¿¡´Â WIA¿£Áø »ç¿ë ºÒ°¡");</span>
+
+<span style = "background-color:#dfd">	car.setType(TRUCK);
+	engine.setType(TOYOTA);
+	brake.setType(MANDO);
+	ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "FAIL\nTruck¿¡´Â MandoÁ¦µ¿ÀåÄ¡ »ç¿ë ºÒ°¡");</span>
+
+<span style = "background-color:#dfd">	car.setType(SEDAN);
+	engine.setType(GM);
+	brake.setType(BOSCH_B);
+	steering.setType(MOBIS);
+	ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "FAIL\nBoschÁ¦µ¿ÀåÄ¡¿¡´Â BoschÁ¶ÇâÀåÄ¡ ÀÌ¿Ü »ç¿ë ºÒ°¡");</span>
+
+<span style = "background-color:#dfd">	car.setType(SUV);
+	engine.setType(GM);
+	brake.setType(MANDO);
+	steering.setType(BOSCH_S);
+	ret = assembler.generateTestResultString(car, engine, brake, steering);
+	EXPECT_EQ(ret, "PASS");
+}</span></pre>
+        <hr />
+        <table width="100%">
+            <thead>
+                <tr>
+                    <th align="center">
+                        <small>Generated by</small>
+                        <a href="https://github.com/OpenCppCoverage/OpenCppCoverage/releases">
+                            <strong>OpenCppCoverage (Version: 0.9.9.0)</strong>
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </body>
+</html>
