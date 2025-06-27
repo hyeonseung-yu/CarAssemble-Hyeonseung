@@ -14,11 +14,11 @@ int main()
 #include <string>
 #include <sstream>
 
-#include "car.h"
-#include "engine.h"
-#include "brake.h"
-#include "steering.h"
-#include "assembler.h"
+#include "car.cpp"
+#include "engine.cpp"
+#include "brake.cpp"
+#include "steering.cpp"
+#include "assembler.cpp"
 
 #define CLEAR_SCREEN "\033[H\033[2J"
 
